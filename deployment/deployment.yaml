@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ip-pool-manager-deployment
+  labels:
+    app: ip-pool-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ip-pool-manager
+  template:
+    metadata:
+      labels:
+        app: ip-pool-manager
+    spec:
+      containers:
+        - name: ip-pool-manager-container
+          image: ghcr.io/uerenreply/ip-pool-manager:main
+          # command: ["/bin/sh", "-c", "env"]
+          ports:
+            - containerPort: 3000
+          # livenessProbe:
+          #   httpGet:
+          #     path: /healthz
+          #     port: 3000
+          #   initialDelaySeconds: 120
+          #   periodSeconds: 20
+          # readinessProbe:
+          #   httpGet:
+          #     path: /readyz
+          #     port: 3000
+          #   initialDelaySeconds: 120
+          #   periodSeconds: 20
+          env:
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ip-pool-manager-config
+                  key: server_port
+            - name: SERVER_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: ip-pool-manager-config
+                  key: server_address
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ip-pool-manager-config
+                  key: redis_port
+            - name: REDIS_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: ip-pool-manager-config
+                  key: redis_address
+      imagePullSecrets:
+        - name: ghcr
